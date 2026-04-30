@@ -1,118 +1,108 @@
-# Visual Communications Space
+# Visual-Communications Plugin
 
-This workspace is designed for enhancing long-form content projects (whitepapers, blog posts, technical documents) with AI-generated visual communications.
+A Claude Code plugin for planning and prompt-engineering AI-generated visuals (images, diagrams, video) for long-form content projects such as whitepapers, blogs, technical documents, and presentations.
 
-## Workflow
+## Overview
 
-The visual communication process follows two main phases:
+The plugin guides users through two phases of visual enhancement:
 
-1. **Ideation** - Brainstorming and suggesting visual elements that would enhance the content
-2. **Generation** - Creating the actual visuals using AI image/video generation tools
+1. **Project onboarding** — Set up a project, gather source material, and define target platform and style
+2. **Ideation & prompt generation** — Brainstorm visual concepts and convert them into optimized generation prompts
+3. **Generation & management** — Execute prompts via the fal-ai MCP and manage visual assets
 
-## Project Structure
+## Data Storage
 
-Each project lives in its own directory under `projects/`:
+All project data is stored in the plugin data directory:
 
 ```
-projects/
-  my-whitepaper/
-    source/           # Original content (markdown, docs, PDFs)
-    visuals/          # Generated images and videos
-    prompts/          # Saved prompts for reproducibility
-    project.yaml      # Project configuration
+${CLAUDE_PLUGIN_DATA:-$HOME/.local/share/claude-plugins}/visual-communications/
+  projects/
+    <project-name>/
+      source/            # Original content (markdown, PDFs, etc.)
+      visuals/           # Generated images and videos
+      prompts/           # Saved prompts (YAML format)
+      project.yaml       # Project configuration
+      ideation.md        # Brainstormed visual concepts
 ```
 
-## Project Configuration
+Each project's `project.yaml` defines:
+- Project name, type (whitepaper | blog | technical-doc | magazine | presentation), and goal
+- Target platform (web | print | social | presentation | pdf)
+- Target audience and visual style preferences
+- Resolution specifications per platform
+- References to source material
 
-Each project has a `project.yaml` file:
+## Skills
 
-```yaml
-name: "Project Name"
-type: whitepaper | blog | technical-doc | article | presentation
-target_platform: web | print | magazine | social
-purpose: "Brief description of the project's goal"
-audience: "Target audience description"
-resolution:
-  web: 1920x1080
-  print: 300dpi
-  social: platform-specific
-style_preferences:
-  - "modern"
-  - "minimalist"
-  - "professional"
-source_files:
-  - source/main.md
-notes: |
-  Any additional context about the project
-```
+### onboard-visual-project
+Set up a new project. Collects project name, type, purpose, platform, source material, audience, and style preferences. Scaffolds the project directory and writes `project.yaml`.
 
-## Commands
+### ideate-visuals
+Analyze source content and brainstorm 5–8 visual concepts across categories:
+- Hero/header images
+- Explanatory visuals (flowcharts, diagrams, infographics)
+- Conceptual illustrations
+- Data visualizations
+- Spot illustrations and icons
+- Interactive/animated content
+- Video content
 
-### `/onboard` - Project Setup
-Initialize a new visual communication project. Collects:
-- Project name and type
-- Source material location
-- Target platform (affects resolution recommendations)
-- Style preferences
-- Project goals
+Saves ideation notes to `ideation.md` for later reference.
 
-### `/ideate` - Visual Brainstorming
-Analyzes the source content and suggests visual communication methods:
-- Infographics and data visualizations
-- Flowcharts and diagrams
-- Illustrations and concept art
-- Photography-style images
-- Icons and spot illustrations
-- Videos and animations
-- Interactive web experiences
+### generate-visual-prompt
+Convert a visual concept into a detailed, model-optimized prompt. Provides:
+- 2–3 prompt variations with different style approaches
+- Negative prompts for unwanted elements
+- Model-specific tips (Flux, SDXL, video)
+- Technical specifications (aspect ratio, resolution)
 
-### `/prompt` - Generate Prompts
-Creates optimized prompts for image/video generation:
-- Text-to-image prompts for various models (Flux, SDXL, etc.)
-- Image-to-image enhancement prompts
-- Style transfer suggestions
-- Video generation prompts
+Saves prompts as YAML to `prompts/<slug>.yaml`.
 
-## MCP Tools Available
+### list-visual-projects
+Scan all projects in the data directory and display status:
+- Ideation complete? (yes/no)
+- Prompts generated? (count)
+- Visuals saved? (count)
+- Source loaded? (yes/no)
 
-This workspace uses the `fal-ai` MCP server for image generation:
-- `generate_image` - Text-to-image generation
-- `generate_image_from_image` - Image-to-image transformation
-- `edit_image` - Edit existing images
-- `upscale_image` - Enhance image resolution
-- `generate_video` - Create videos from prompts
-- `generate_video_from_image` - Animate static images
+Useful for switching between projects and tracking progress.
 
-## Resolution Guidelines
+### run-fal-generation
+Execute a saved prompt using the fal-ai MCP server. Generates images or video and saves to the project's `visuals/` directory. Updates the prompt YAML's `generated_files` list for tracking. Detects missing MCP and directs user to install if needed.
 
-| Platform | Recommended Resolution | Notes |
-|----------|----------------------|-------|
-| Web/Blog | 1920x1080 or 1200x800 | Optimize for fast loading |
-| Print Magazine | 300 DPI, actual size | Request CMYK-friendly colors |
-| Social Media | Platform-specific | Square (1080x1080) works broadly |
-| Presentation | 1920x1080 | 16:9 aspect ratio |
-| Whitepaper | 1200x800 or full-page | Balance quality and file size |
+### visual-style-reference
+Display resolution guidelines per platform (web, print, social, presentation, whitepaper) and curated style-modifier vocabulary (professional, technical, editorial, friendly) for use in prompts.
 
-## Style Prompt Modifiers
+## MCP Dependency
 
-When generating prompts, consider these style additions:
+The plugin uses the **fal-ai** MCP server for image and video generation:
+- `generate_image` — Text-to-image generation (Flux, SDXL, etc.)
+- `generate_image_from_image` — Image-to-image transformation
+- `edit_image` — Image editing
+- `upscale_image` — Enhance resolution
+- `generate_video` — Text-to-video generation
+- `generate_video_from_image` — Animate static images
 
-**Professional/Corporate:**
-- "clean, modern design"
-- "professional color palette"
-- "minimal, elegant composition"
+Ensure the fal-ai MCP is installed and configured before using `/run-fal-generation`.
 
-**Technical:**
-- "technical illustration style"
-- "blueprint aesthetic"
-- "isometric 3D rendering"
+## Typical Workflow
 
-**Editorial:**
-- "editorial illustration"
-- "magazine-quality photography"
-- "conceptual art"
+1. Run `/onboard-visual-project` to create a new project and load source material
+2. Run `/ideate-visuals` to brainstorm visual concepts for the content
+3. Review ideation and select promising concepts
+4. Run `/generate-visual-prompt` to create generation prompts for chosen visuals
+5. Run `/run-fal-generation` to execute prompts and save images/video
+6. Iterate on prompts and regenerate as needed
+7. Use `/list-visual-projects` to track progress across all projects
+8. Refer to `/visual-style-reference` for platform specs and style modifiers
 
-**Friendly/Accessible:**
-- "warm, approachable style"
-- "hand-drawn illustration feel"
-- "friendly cartoon style"
+## Style Guidelines
+
+The plugin supports multiple visual aesthetics:
+
+- **Professional/Corporate** — clean, modern, minimal, professional color palette
+- **Technical** — technical illustration, blueprint aesthetic, isometric 3D
+- **Editorial** — editorial illustration, magazine-quality, conceptual art
+- **Friendly/Accessible** — warm, approachable, hand-drawn, cartoon style
+
+See `/visual-style-reference` for detailed modifier vocabulary.
