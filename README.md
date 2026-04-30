@@ -36,7 +36,12 @@ ${CLAUDE_PLUGIN_DATA:-$HOME/.local/share/claude-plugins}/visual-communications/p
 
 ## Dependencies
 
-- **Optional**: `fal-ai` MCP server — required only by `run-fal-generation`. The other five skills work without it.
+- **Optional**: official **fal-ai** remote MCP server (https://fal.ai/docs/documentation/setting-up/mcp) — required only by `run-fal-generation`. Install with:
+  ```bash
+  claude mcp add --transport http fal-ai https://mcp.fal.ai/mcp \
+    --header "Authorization: Bearer $FAL_KEY"
+  ```
+  The other five skills work without it.
 
 ## Workflow
 

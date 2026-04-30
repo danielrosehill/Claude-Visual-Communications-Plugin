@@ -75,15 +75,23 @@ Display resolution guidelines per platform (web, print, social, presentation, wh
 
 ## MCP Dependency
 
-The plugin uses the **fal-ai** MCP server for image and video generation:
-- `generate_image` — Text-to-image generation (Flux, SDXL, etc.)
-- `generate_image_from_image` — Image-to-image transformation
-- `edit_image` — Image editing
-- `upscale_image` — Enhance resolution
-- `generate_video` — Text-to-video generation
-- `generate_video_from_image` — Animate static images
+The plugin targets the **official fal-ai remote MCP server** at https://mcp.fal.ai/mcp (https://fal.ai/docs/documentation/setting-up/mcp).
 
-Ensure the fal-ai MCP is installed and configured before using `/run-fal-generation`.
+Install once:
+
+```bash
+claude mcp add --transport http fal-ai https://mcp.fal.ai/mcp \
+  --header "Authorization: Bearer $FAL_KEY"
+```
+
+Tools used by `run-fal-generation`:
+
+- `mcp__fal-ai__search_models`, `mcp__fal-ai__recommend_model`, `mcp__fal-ai__get_model_schema`, `mcp__fal-ai__get_pricing`, `mcp__fal-ai__search_docs` — discovery & validation
+- `mcp__fal-ai__run_model` — synchronous run for short jobs
+- `mcp__fal-ai__submit_job` + `mcp__fal-ai__check_job` — async run + polling for video and long jobs
+- `mcp__fal-ai__upload_file` — push a local reference to fal's CDN for image-to-image / video-from-image inputs
+
+Outputs are returned as CDN URLs; `run-fal-generation` is responsible for downloading them into `projects/<name>/visuals/`.
 
 ## Typical Workflow
 
