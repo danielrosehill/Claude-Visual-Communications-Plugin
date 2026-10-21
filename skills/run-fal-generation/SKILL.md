@@ -5,6 +5,21 @@ description: Use when the user wants to execute a saved prompt against the offic
 
 # Run FAL Generation
 
+## Tool names (portable)
+
+Tools are named here by their bare name on the `fal-ai` MCP server (e.g. `run_model`). Resolve
+the callable name once per session:
+
+1. **Local override.** If `config.json` exists in this plugin's data directory
+   (`$CLAUDE_USER_DATA/visual-communications/`, else `$XDG_DATA_HOME/claude-plugins/visual-communications/`, else
+   `~/.local/share/claude-plugins/visual-communications/`), call `<tool_prefix><name>`. If it also has a
+   `tools` map, take `<name>` from it first. A name mapped to `null` has no equivalent on that
+   setup: say so and use the fallback that `notes` gives.
+2. **Otherwise,** use the loaded tool whose name ends in `fal-ai__<name>`. A direct install
+   is `mcp__fal-ai__<name>`; a proxy or gateway adds its own prefix.
+3. **Otherwise** the server isn't connected. Stop and point the user to: the README's Dependencies section (fal's official remote MCP, `https://mcp.fal.ai/mcp`, with a `FAL_KEY` bearer header).
+
+
 Execute a saved prompt against the **official fal-ai MCP server** (https://mcp.fal.ai/mcp), then save the output into the project's `visuals/` directory and update the prompt YAML.
 
 ## When to use
@@ -24,24 +39,24 @@ claude mcp add --transport http fal-ai https://mcp.fal.ai/mcp \
 
 (Source: https://fal.ai/docs/documentation/setting-up/mcp — auth is a bearer token in the header; no npm package or env-var-only config.)
 
-If `mcp__fal-ai__*` tools are not exposed in the current session, stop and instruct the user to run the command above with their fal API key.
+If `fal-ai` tools are not exposed in the current session, stop and instruct the user to run the command above with their fal API key.
 
 ## Tools exposed by the official server
 
 Discovery:
-- `mcp__fal-ai__search_models` — find models by keyword/category
-- `mcp__fal-ai__get_model_schema` — full input/output schema for a model
-- `mcp__fal-ai__get_pricing` — cost of running a model before you call it
-- `mcp__fal-ai__search_docs` — search fal docs
-- `mcp__fal-ai__recommend_model` — describe goal, get model suggestions
+- `search_models` — find models by keyword/category
+- `get_model_schema` — full input/output schema for a model
+- `get_pricing` — cost of running a model before you call it
+- `search_docs` — search fal docs
+- `recommend_model` — describe goal, get model suggestions
 
 Execution:
-- `mcp__fal-ai__run_model` — run a model and wait for the result (images, video, audio)
-- `mcp__fal-ai__submit_job` — submit a long-running job, return a request ID
-- `mcp__fal-ai__check_job` — poll status / fetch result / cancel
+- `run_model` — run a model and wait for the result (images, video, audio)
+- `submit_job` — submit a long-running job, return a request ID
+- `check_job` — poll status / fetch result / cancel
 
 Utility:
-- `mcp__fal-ai__upload_file` — upload a local file (or URL) to fal's CDN; returns a `cdn_url` usable as `image_url`/`audio_url` input
+- `upload_file` — upload a local file (or URL) to fal's CDN; returns a `cdn_url` usable as `image_url`/`audio_url` input
 
 Outputs from `run_model` / `check_job` are returned as **CDN URLs**, not local paths — this skill is responsible for downloading them.
 
@@ -55,7 +70,7 @@ Outputs from `run_model` / `check_job` are returned as **CDN URLs**, not local p
 
 ## Procedure
 
-1. **Verify the MCP is connected.** Check that `mcp__fal-ai__*` tools are available. If not, direct the user to the install command above and stop.
+1. **Verify the MCP is connected.** Check that `fal-ai` tools are available. If not, direct the user to the install command above and stop.
 
 2. **Load project + prompt.** Read `${CLAUDE_PLUGIN_DATA:-$HOME/.local/share/claude-plugins}/visual-communications/projects/<project>/project.yaml` and `prompts/<slug>.yaml`.
 
@@ -66,8 +81,8 @@ Outputs from `run_model` / `check_job` are returned as **CDN URLs**, not local p
 5. **Upload references if needed.** For image-to-image or video-from-image, call `upload_file` on the local reference and use the returned `cdn_url` as `image_url` in the model input.
 
 6. **Run the model.**
-   - Default: `mcp__fal-ai__run_model` (synchronous; preferred for short jobs)
-   - Long-running (most video, large batches): `mcp__fal-ai__submit_job` → poll with `mcp__fal-ai__check_job` until status is `completed`. Use `submit_job` whenever the model's typical latency exceeds ~60s.
+   - Default: `run_model` (synchronous; preferred for short jobs)
+   - Long-running (most video, large batches): `submit_job` → poll with `check_job` until status is `completed`. Use `submit_job` whenever the model's typical latency exceeds ~60s.
 
 7. **Download the outputs.** Parse output URLs from the response (typical fields: `images[].url`, `video.url`, `audio.url`). For each, download to:
    ```

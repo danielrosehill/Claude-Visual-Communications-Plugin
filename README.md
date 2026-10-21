@@ -52,6 +52,24 @@ generate-visual-prompt    → projects/<name>/prompts/<slug>.yaml
 run-fal-generation        → projects/<name>/visuals/<file>
 ```
 
+## Customising tool names
+
+The skills name tools by their bare name on the `fal-ai` MCP server and work out the callable
+name at run time. A direct install (`mcp__fal-ai__<tool>`) needs no setup. If your MCP client
+or gateway names them differently, put a `config.json` in the plugin's data directory
+(`$CLAUDE_USER_DATA/visual-communications/`, else `$XDG_DATA_HOME/claude-plugins/visual-communications/`, else
+`~/.local/share/claude-plugins/visual-communications/`). It stays local and is never part of the plugin:
+
+```json
+{
+  "tool_prefix": "mcp__mygateway__fal__",
+  "tools": { "run_model": "generate_image", "search_models": "list_models", "get_model_schema": null },
+  "notes": "No schema tool on this server: read the model page on fal.ai instead."
+}
+```
+
+`run-fal-generation` is written for fal's official MCP (`run_model`, `submit_job`, `check_job`, …). If you reach fal through a different server, map each name in `tools`; `null` means "not available here", and the skill says so and follows `notes`.
+
 ## License
 
 MIT — Daniel Rosehill.
