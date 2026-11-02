@@ -1,6 +1,6 @@
 {
   "name": "visual-communications",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Plan and prompt-engineer AI-generated visuals (images, diagrams, video) for whitepapers, blog posts, and long-form content. Six skills cover project onboarding, visual ideation, prompt generation, project listing, fal-ai execution, and style reference.",
   "author": {
     "name": "Daniel Rosehill",
