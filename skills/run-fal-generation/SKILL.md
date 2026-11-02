@@ -78,7 +78,7 @@ Outputs from `run_model` / `check_job` are returned as **CDN URLs**, not local p
 
 4. **Sanity-check inputs and price.** Call `get_model_schema` to confirm parameter names (image models commonly take `prompt`, `image_size` / `aspect_ratio`, `num_images`, `negative_prompt`; video models often take `prompt`, `image_url`, `duration`). Optionally call `get_pricing` and surface the cost to the user before running.
 
-5. **Upload references if needed.** For image-to-image or video-from-image, call `upload_file` on the local reference and use the returned `cdn_url` as `image_url` in the model input.
+5. **Upload references if needed.** For image-to-image or video-from-image, call `upload_file` on the local reference and use the returned `cdn_url` as `image_url` in the model input. If the fal tool runs on the gateway and can't read the local path, stage the file with `cloud-storage:stage-file` (`stage.sh <file>` → presigned URL; delete after) and pass that URL as `image_url`. Don't improvise another route.
 
 6. **Run the model.**
    - Default: `run_model` (synchronous; preferred for short jobs)
