@@ -8,7 +8,7 @@ The plugin guides users through two phases of visual enhancement:
 
 1. **Project onboarding** — Set up a project, gather source material, and define target platform and style
 2. **Ideation & prompt generation** — Brainstorm visual concepts and convert them into optimized generation prompts
-3. **Generation & management** — Execute prompts via the fal-ai MCP and manage visual assets
+3. **Generation & management** — Execute prompts via the fal REST API and manage visual assets
 
 ## Data Storage
 
@@ -68,30 +68,21 @@ Scan all projects in the data directory and display status:
 Useful for switching between projects and tracking progress.
 
 ### run-fal-generation
-Execute a saved prompt using the fal-ai MCP server. Generates images or video and saves to the project's `visuals/` directory. Updates the prompt YAML's `generated_files` list for tracking. Detects missing MCP and directs user to install if needed.
+Execute a saved prompt using the fal REST API (`FAL_KEY`). Generates images or video and saves to the project's `visuals/` directory. Updates the prompt YAML's `generated_files` list for tracking. Stops if `FAL_KEY` is not set.
 
 ### visual-style-reference
 Display resolution guidelines per platform (web, print, social, presentation, whitepaper) and curated style-modifier vocabulary (professional, technical, editorial, friendly) for use in prompts.
 
-## MCP Dependency
+## fal API dependency
 
-The plugin targets the **official fal-ai remote MCP server** at https://mcp.fal.ai/mcp (https://fal.ai/docs/documentation/setting-up/mcp).
+`run-fal-generation` calls fal's REST API directly with `Authorization: Key $FAL_KEY` (no MCP server):
 
-Install once:
+- `GET https://api.fal.ai/v1/models?q=...` and `.../v1/models/pricing?endpoint_id=...` for discovery and price
+- `https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=...` for the input schema
+- `POST https://queue.fal.run/<model>`, then poll `status_url` and GET `response_url`
+- local references go in as `data:` URIs
 
-```bash
-claude mcp add --transport http fal-ai https://mcp.fal.ai/mcp \
-  --header "Authorization: Bearer $FAL_KEY"
-```
-
-Tools used by `run-fal-generation`:
-
-- `search_models`, `recommend_model`, `get_model_schema`, `get_pricing`, `search_docs` — discovery & validation
-- `run_model` — synchronous run for short jobs
-- `submit_job` + `check_job` — async run + polling for video and long jobs
-- `upload_file` — push a local reference to fal's CDN for image-to-image / video-from-image inputs
-
-Outputs are returned as CDN URLs; `run-fal-generation` is responsible for downloading them into `projects/<name>/visuals/`.
+Outputs are CDN URLs; `run-fal-generation` is responsible for downloading them into `projects/<name>/visuals/`.
 
 ## Typical Workflow
 
