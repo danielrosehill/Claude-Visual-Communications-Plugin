@@ -36,7 +36,7 @@ ${CLAUDE_PLUGIN_DATA:-$HOME/.local/share/claude-plugins}/visual-communications/p
 
 ## Dependencies
 
-- **Optional**: a fal API key in `FAL_KEY` (https://fal.ai/dashboard/keys), required only by `run-fal-generation`, which calls fal's REST API directly (run under `with-secrets` or export it). The other five skills work without it.
+- **Optional**: a fal API key in `FAL_KEY` (https://fal.ai/dashboard/keys), required only by `run-fal-generation`, which calls fal's REST API directly (supply it from your own secrets manager or export it). The other five skills work without it.
 
 ## Workflow
 

@@ -5,7 +5,7 @@ description: Use when the user wants to execute a saved prompt against the fal R
 
 # Run FAL Generation
 
-Execute a saved prompt against fal's REST API with `$FAL_KEY` (run commands under `with-secrets`, or any shell that has `FAL_KEY` set), then save the output into the project's `visuals/` directory and update the prompt YAML. No MCP server is involved.
+Execute a saved prompt against fal's REST API with `$FAL_KEY` (supply it from your own secrets manager or shell), then save the output into the project's `visuals/` directory and update the prompt YAML. No MCP server is involved.
 
 ## When to use
 
@@ -35,7 +35,7 @@ Outputs are CDN URLs, not local paths. This skill downloads them.
 Example:
 
 ```bash
-with-secrets bash -c '
+bash -c '
 R=$(curl -s https://queue.fal.run/fal-ai/flux/dev -H "Authorization: Key $FAL_KEY" \
   -H "Content-Type: application/json" -d @input.json)
 S=$(echo "$R" | jq -r .status_url); O=$(echo "$R" | jq -r .response_url)
@@ -53,7 +53,7 @@ curl -s -H "Authorization: Key $FAL_KEY" "$O" > result.json'
 
 ## Procedure
 
-1. **Verify the key.** `FAL_KEY` must be set (`with-secrets bash -c 'test -n "$FAL_KEY"'`). If not, tell the user and stop.
+1. **Verify the key.** `FAL_KEY` must be set (`test -n "$FAL_KEY"`). If not, tell the user and stop.
 
 2. **Load project + prompt.** Read `${CLAUDE_PLUGIN_DATA:-$HOME/.local/share/claude-plugins}/visual-communications/projects/<project>/project.yaml` and `prompts/<slug>.yaml`.
 
